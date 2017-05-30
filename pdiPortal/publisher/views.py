@@ -3,14 +3,19 @@ This is the views for the publisher application.
 """
 
 from django.contrib.admin.views.decorators import user_passes_test
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, render_to_response
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.views.generic import View
 
+from rest_framework.generics import RetrieveAPIView
+from rest_framework import permissions
+
 from braces.views import LoginRequiredMixin, PermissionRequiredMixin
 
 from .forms import CreateApplicationForm
+from .models import Application
+from .serializers import ApplicationSerializer
 
 # Create your views here.
 @login_required
@@ -44,4 +49,18 @@ class CreateApplication(LoginRequiredMixin,
 
     def post(self, request):
         """This will process the form when submitted."""
-        application_form = CreateApplicationForm(request.POST)
+        application_form = CreateApplicationForm(request.POST, request.FILES)
+        if application_form.is_valid():
+            app = application_form.save()
+            return redirect('publisher')
+        else:
+            return render_to_response('core/form-error.html', {'form': application_form})
+
+
+class GetApplication(RetrieveAPIView):
+    """This endpoint retireved an application by id."""
+
+    queryset = Application.objects.all()
+    serializer_class = ApplicationSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    lookup_field = '_id'

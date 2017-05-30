@@ -5,7 +5,7 @@
 <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
   <h1 class="page-header">Create Application</h1>
 
-  <form action="{% url 'create-admin' %}" method="post">
+  <form enctype="multipart/form-data" action="{% url 'create-app' %}" method="POST">
       {% csrf_token %}
       {{ appForm|crispy }}
       <input type="submit" value="Publish" />
